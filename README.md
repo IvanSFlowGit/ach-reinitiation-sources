@@ -63,8 +63,11 @@ to members of an ACH association, and provisions requiring dues or fees.
 | Nacha Operating Rules 2.12.4 | primary, paid | not readable | not readable | not readable |
 | Fed Operating Circular 4, eff. 2026-01-05 | primary, free | states nothing | states nothing | states nothing |
 | Increase, ACH returns documentation | processor, live implementation | "a maximum of two times" | 180 days | settlement date of the original transfer |
-| Unattributed originator quick-reference card, hosted by a US community bank | secondary, cites the **2017** edition of the rules | "a total of 3 presentments" | 180 days | settlement date of the original entry |
+| Crowded | processor | two additional attempts | 180 calendar days | settlement |
+| Adyen, ACH chargeback guidelines | processor, live implementation | "up to two times" | **30 days** | **original authorization date** |
+| Fiserv, CardPointe BluePay ACH guide | processor, live implementation | "up to two times" | **30 days** | **original authorization date** |
 | Stripe, ACH Direct Debit documentation | processor, live implementation | "a maximum of 2 times" | 40 days | original payment attempt |
+| Unattributed originator quick-reference card, hosted by a US community bank | secondary, cites the **2017** edition of the rules | "a total of 3 presentments" | 180 days | settlement date of the original entry |
 | Widely repeated summary phrasing | secondary | "two re-presentments" | 180 days | original entry date |
 
 All retrieved 2026-08-24. The Fed circular carries an effective date on its own face;
@@ -85,11 +88,11 @@ units and neither says which unit it is using. If you take the larger number fro
 source and the unit from the other you will build a schedule with one attempt too
 many in it, and nothing in either document will tell you that you have.
 
-**Stripe's 40 days is not the network rule.** It is Stripe's own limit on its
-automatic retry feature, and it is stricter than the network's. That is a platform
-policy sitting on top of a network rule, and the page does not label it as either.
-Both numbers can be correct at once, and a schedule built to 180 days on Stripe will
-simply stop retrying at day 41 without anybody having broken a rule.
+**A platform limit is not the network rule.** Stripe's 40 days is Stripe's own cap on
+its automatic retry feature. That is a platform policy sitting on top of a network
+rule, and the page does not label it as either, so a schedule built to 180 days on
+Stripe simply stops retrying at day 41 without anybody having broken a rule. Read
+every processor's number as a platform policy until something proves otherwise.
 
 **Only R01 and R09 are re-presentable in the ordinary case.** Every source that
 addresses it agrees: insufficient funds and uncollected funds. Two sources add the
@@ -101,23 +104,31 @@ company identification and amount.
 
 ## The one that does not dissolve
 
-The clock start. Increase says 180 days from the **settlement date** of the original
-transfer. The most widely repeated phrasing says 180 days from the **original entry
-date**. Those are different dates. An entry date is when the item is submitted; a
-settlement date is when it settles, typically one or two banking days later.
+The window and the clock, together, and it is not a quibble. Among parties who each
+operate a live ACH system and are documenting their own behaviour:
 
-For most of a 180 day window that difference is invisible. It is only ever decisive
-at the boundary, which is precisely where a long dunning schedule lives: an attempt
-placed at day 179 is legal under one reading and outside the network under the other.
+- Increase: two reinitiations, **180 days**, from the **settlement date**
+- Crowded: two additional attempts, **180 calendar days**, from **settlement**
+- Adyen: "up to two times", **30 days**, from the **original authorization date**
+- Fiserv, CardPointe BluePay: "up to two times", **30 days**, from the **original
+  authorization date**
+- Stripe: "a maximum of 2 times", **40 days**, from the **original payment attempt**
 
-I could not settle this for free. The governing sentence is in the paid text. What I
-can say is which source is worth more: a processor documenting the behaviour of a
-system it actually operates is stronger evidence than a summary, because the
-processor has to be right or its own transfers get returned. On that weighting the
-settlement date reading is better supported, and it is also the more conservative of
-the two, since settlement is later than entry and reading the clock from the earlier
-date gives you a shorter window. If you need certainty rather than the conservative
-choice, buy the book.
+Thirty days against a hundred and eighty is a six-fold spread on the same rule, and
+authorisation is not settlement: authorisation happens before the entry is even sent,
+settlement one or two banking days after. Two processors sit on each side of it. This
+is not a case of summaries garbling a clear rule, because the sources disagreeing here
+are the ones with the strongest reason to be right.
+
+Adyen also publishes something the "only R01 and R09" framing does not survive:
+**R11, entry not in accordance with the terms of the authorization, is retryable
+within 60 days of the original settlement date.** A third window, a third clock, on a
+return code most summaries list as not retryable at all.
+
+I cannot settle this for free. The governing sentence is in the paid text. What I can
+say is that anybody holding one of these numbers and believing it to be the network
+rule is holding one processor's implementation of it, and there are at least three
+mutually exclusive candidates.
 
 ## If you are building a schedule
 
@@ -175,8 +186,28 @@ rather than as the rule.
 I did not test any of this against a live ACH transfer. The processor documentation
 is taken at its word as a description of its own behaviour.
 
-The "30 days from the authorisation date" variant that circulates is not in any
-source I could retrieve today, and I am not repeating it as a finding.
+Crowded returned HTTP 403 and the Fiserv developer site rendered no text to a fetch,
+so those two rows are recorded from readings taken on 2026-08-12 and 2026-08-22 by
+earlier work of mine rather than re-verified today. Adyen I read at source on
+2026-08-24. Increase and Stripe likewise.
+
+## Correction, 2026-08-24
+
+The first version of this document, commit `34f47ca`, said that the "30 days from the
+authorisation date" variant "is not in any source I could retrieve today, and I am
+not repeating it as a finding". **That was false, and it was false in the direction
+that made my own piece look tidier.** Adyen and Fiserv both publish it, and Adyen's
+page is quoted above from a reading taken at source.
+
+I had searched for it, found nothing, and reported the absence. The search covered
+three directories and did not cover the one holding a two-page mapping of this exact
+question that had already been exported and sent to somebody. A zero inherits the
+boundary of whatever produced it, and the boundary is the part nobody writes down.
+
+The correction makes the finding stronger rather than weaker, which is the usual shape
+when a negative turns out to be a gap in the search. The original version had one open
+question about a clock. This one has three incompatible windows published by five
+parties who each run a live ACH system.
 
 ## A wrong turn worth recording
 
@@ -216,6 +247,12 @@ All retrieved 2026-08-24.
   https://increase.com/documentation/ach-returns
 - Stripe, ACH Direct Debit documentation, "Billing retries":
   https://docs.stripe.com/payments/ach-direct-debit
+- Adyen, ACH chargeback guidelines, read at source 2026-08-24:
+  https://docs.adyen.com/risk-management/chargeback-guidelines/ach-chargebacks
+- Fiserv, CardPointe BluePay ACH guide, read 2026-08-22, not re-reachable 2026-08-24:
+  https://developer.fiserv.com/product/CardPointe/docs/documentation/BluePayACHGuide.md
+- Crowded, read 2026-08-12, returned HTTP 403 on 2026-08-24:
+  https://www.bankingcrowded.com/all-blogs/ach-return-codes-r02-r03-r04-nonprofit-platforms
 - Nacha, which sells the Operating Rules:
   https://www.nacha.org/rules
 - The unattributed originator quick-reference card, cited for what it demonstrates

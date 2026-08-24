@@ -114,6 +114,12 @@ operate a live ACH system and are documenting their own behaviour:
   authorization date**
 - Stripe: "a maximum of 2 times", **40 days**, from the **original payment attempt**
 
+Adyen, verbatim, against R01 and against R09:
+
+> You can retry the transaction up to two times within 30 days of the original
+> authorization date.
+
+
 Thirty days against a hundred and eighty is a six-fold spread on the same rule, and
 authorisation is not settlement: authorisation happens before the entry is even sent,
 settlement one or two banking days after. Two processors sit on each side of it. This

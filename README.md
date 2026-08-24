@@ -138,6 +138,10 @@ Beyond 180 days there is no ACH remedy at all. Collection moves outside the netw
 
 ## How to reproduce the measurement
 
+Run `./verify.sh`. It resolves the current circular from the Fed's index, downloads
+it, extracts it, asserts its controls and prints the counts, and exits non-zero if
+any of that fails. The manual version is below.
+
     # the circular, from the Fed's own index rather than a remembered URL
     curl -sL -A 'Mozilla/5.0' \
       https://www.frbservices.org/resources/rules-regulations/operating-circulars.html \
@@ -180,9 +184,21 @@ My first measurement returned 225,810 characters of extracted text and zero hits
 and it was on the wrong document. OC 4 was revised effective 2026-01-05; I had the
 superseded 2024-10-28 version, and I only noticed because that character count
 matched an earlier note exactly, which is not what a fresh reading of a current
-document should do. The finding survived on the current version, unchanged. It would
-not have been the first time a correct measurement was reported against a superseded
-file.
+document should do. The finding survived on the current version, unchanged.
+
+Then the verification script in this repository made the same mistake, which is the
+part worth keeping. It resolved the PDF from the Fed's index and picked the newest
+by sorting the filenames in reverse. The Fed names these files with an MMDDYY
+prefix, so as text `102824` sorts above `010526` and the script confidently selected
+the October 2024 version over the January 2026 one. It printed a clean run with its
+controls firing, because the controls were doing their job: the extraction was fine
+and the document was real. Nothing in a control can tell you that you are measuring
+the right object.
+
+It was caught by the Nacha count, 15 where this document says 13. The number that did
+not match was the only thing that surfaced it, twice, on the same error. `verify.sh`
+now parses the prefix into a date and cross-checks it against the effective date the
+index page states in prose, and refuses to proceed when those disagree.
 
 ## Sources
 

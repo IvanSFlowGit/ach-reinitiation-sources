@@ -13,10 +13,27 @@ cd "$WORK"
 command -v pdftotext >/dev/null || { echo "need pdftotext (poppler)"; exit 2; }
 
 echo "resolving the current OC 4 from the Fed's own index"
-PDF=$(curl -sfL -A "$UA" "$IDX" \
-      | grep -o '[^"]*operating-circular-4\.pdf' \
-      | grep -v redline | sort -r | head -1)
-[ -n "$PDF" ] || { echo "could not find OC 4 on the index page"; exit 2; }
+# The filename prefix is MMDDYY, which does NOT sort chronologically as a string:
+# 102824 (Oct 2024) sorts above 010526 (Jan 2026). Parse the date, do not sort text.
+curl -sfL -A "$UA" "$IDX" -o index.html
+PDF=$(python3 - <<'PYSEL'
+import re, sys, datetime
+h = open('index.html', encoding='utf-8', errors='replace').read()
+links = set(re.findall(r'(/[^"]*?(\d{6})-operating-circular-4\.pdf)', h))
+if not links:
+    sys.exit("could not find OC 4 on the index page")
+def when(p):
+    mm, dd, yy = int(p[:2]), int(p[2:4]), int(p[4:])
+    return datetime.date(2000 + yy, mm, dd)
+path, pref = max(links, key=lambda t: when(t[1]))
+d = when(pref)
+# Cross-check the filename date against what the page says is effective.
+stated = re.findall(r'effective\s+(\d{2}/\d{2}/\d{2})', h)
+if f"{d.month:02d}/{d.day:02d}/{d.year % 100:02d}" not in stated:
+    sys.exit(f"filename date {d} not among the effective dates stated on the page")
+print(path)
+PYSEL
+) || { echo "could not resolve the current OC 4"; exit 2; }
 echo "  $PDF"
 
 curl -sfL -A "$UA" -o oc4.pdf "https://www.frbservices.org$PDF"

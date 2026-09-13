@@ -80,7 +80,7 @@ current.
 
 ## Three of the four disagreements dissolve
 
-**Two reinitiations and three presentments are the same rule.** Increase says a
+Two reinitiations and three presentments are the same rule. Increase says a
 returned debit may be reinitiated a maximum of two times. The quick-reference card says
 the originator may reinitiate "for a total of 3 presentments". Those agree: the original
 attempt plus two reinitiations is three presentments. They are counting in different
@@ -88,13 +88,13 @@ units and neither says which unit it is using. If you take the larger number fro
 source and the unit from the other you will build a schedule with one attempt too
 many in it, and nothing in either document will tell you that you have.
 
-**A platform limit is not the network rule.** Stripe's 40 days is Stripe's own cap on
+A platform limit is not the network rule. Stripe's 40 days is Stripe's own cap on
 its automatic retry feature. That is a platform policy sitting on top of a network
 rule, and the page does not label it as either, so a schedule built to 180 days on
 Stripe simply stops retrying at day 41 without anybody having broken a rule. Read
 every processor's number as a platform policy until something proves otherwise.
 
-**Only R01 and R09 are re-presentable in the ordinary case.** Every source that
+Only R01 and R09 are re-presentable in the ordinary case. Every source that
 addresses it agrees: insufficient funds and uncollected funds. Two sources add the
 same two exceptions, a return for stop payment where the account holder has
 authorised the reinitiation, and any return where the originator has remedied the
@@ -270,5 +270,9 @@ above, only the Fed circulars carry a date on their own face.
 
 ---
 
-Retrieved and measured 2026-08-24. Nothing here is legal advice. If a payment
-schedule's compliance depends on the clock start, read the paid rulebook.
+Retrieved and measured 2026-08-24. Re-run against the live document on 2026-09-13
+and the counts had not moved: same circular, same zeros, controls firing. I checked it
+twice with different tools and both returned 173,835 characters of extracted text.
+
+Nothing here is legal advice. If a payment schedule's compliance depends on the clock
+start, read the paid rulebook.
